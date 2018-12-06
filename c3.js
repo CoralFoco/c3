@@ -4902,6 +4902,19 @@
     return config.regions;
   };
 
+  Chart.prototype.overlap = function (overlap) {
+    var $$ = this.internal,
+        config = $$.config;
+
+    if (isUndefined(overlap)) {
+      return config.data_overlap;
+    }
+
+    config.data_overlap = overlap;
+    $$.redraw();
+    return config.data_overlap;
+  };
+
   Chart.prototype.selected = function (targetId) {
     var $$ = this.internal,
         d3 = $$.d3;
@@ -6112,6 +6125,7 @@
       data_names: {},
       data_classes: {},
       data_groups: [],
+      data_overlap: [],
       data_axes: {},
       data_type: undefined,
       data_types: {},
@@ -8969,6 +8983,7 @@
 
   ChartInternal.prototype.generateGetBarPoints = function (barIndices, isSub) {
     var $$ = this,
+        overlap = this.config.data_overlap,
         axis = isSub ? $$.subXAxis : $$.xAxis,
         barTargetsNum = barIndices.__max__ + 1,
         barW = $$.getBarW(axis, barTargetsNum),
@@ -8988,6 +9003,10 @@
         if (0 < d.value && posY < y0 || d.value < 0 && y0 < posY) {
           posY = y0;
         }
+      }
+
+      if (overlap && overlap.length > 0 && overlap && overlap.indexOf(barIndices[d.id]) >= 0) {
+        offset = y0;
       } // 4 points that make a bar
 
 

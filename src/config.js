@@ -41,6 +41,7 @@ ChartInternal.prototype.getDefaultConfig = function () {
         data_names: {},
         data_classes: {},
         data_groups: [],
+        data_overlap: [],
         data_axes: {},
         data_type: undefined,
         data_types: {},

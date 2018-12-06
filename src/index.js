@@ -13,6 +13,7 @@ import './api.group';
 import './api.legend';
 import './api.load';
 import './api.region';
+import './api.overlap';
 import './api.selection';
 import './api.show';
 import './api.tooltip';

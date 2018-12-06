@@ -91,6 +91,7 @@ ChartInternal.prototype.generateDrawBar = function (barIndices, isSub) {
 };
 ChartInternal.prototype.generateGetBarPoints = function (barIndices, isSub) {
     var $$ = this,
+        overlap = this.config.data_overlap,
         axis = isSub ? $$.subXAxis : $$.xAxis,
         barTargetsNum = barIndices.__max__ + 1,
         barW = $$.getBarW(axis, barTargetsNum),
@@ -107,6 +108,11 @@ ChartInternal.prototype.generateGetBarPoints = function (barIndices, isSub) {
         if ($$.config.axis_rotated) {
             if ((0 < d.value && posY < y0) || (d.value < 0 && y0 < posY)) { posY = y0; }
         }
+        
+        if (overlap && overlap.length > 0 && overlap && overlap.indexOf(barIndices[d.id]) >= 0) {
+            offset = y0;
+        }
+
         // 4 points that make a bar
         return [
             [posX + barSpaceOffset, offset],
