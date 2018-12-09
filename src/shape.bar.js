@@ -99,6 +99,9 @@ ChartInternal.prototype.generateGetBarPoints = function (barIndices, isSub) {
         barY = $$.getShapeY(!!isSub),
         barOffset = $$.getShapeOffset($$.isBarType, barIndices, !!isSub),
         yScale = isSub ? $$.getSubYScale : $$.getYScale;
+
+    var mapWidth = {};
+
     return function (d, i) {
         var y0 = yScale.call($$, d.id)(0),
             barW = $$.getBarW(axis, barTargetsNum, d),
@@ -106,6 +109,15 @@ ChartInternal.prototype.generateGetBarPoints = function (barIndices, isSub) {
             barSpaceOffset = barW * ($$.config.bar_space / 2),
             offset = barOffset(d, i) || y0, // offset is for stacked bar chart
             posX = barX(d), posY = barY(d);
+
+        if (!mapWidth[barIndices[d.id]]) {
+            mapWidth[barIndices[d.id]] = [barW];
+        } else {
+            if (mapWidth[barIndices[d.id]][mapWidth[barIndices[d.id]].length - 1] !== barW) {
+                mapWidth[barIndices[d.id]].push(barW);
+            }
+        }
+
         // fix posY not to overflow opposite quadrant
         if ($$.config.axis_rotated) {
             if ((0 < d.value && posY < y0) || (d.value < 0 && y0 < posY)) { posY = y0; }
@@ -115,13 +127,25 @@ ChartInternal.prototype.generateGetBarPoints = function (barIndices, isSub) {
             offset = y0;
         }
 
+        console.log(mapWidth[barIndices[d.id]]);
+
+        var startOffset = 0;
+        var finalOffset = 0;
+
+        if (mapWidth[barIndices[d.id]].length > 1) {
+            var offsetX = (mapWidth[barIndices[d.id]][0] - mapWidth[barIndices[d.id]][1]) / 2;
+            startOffset -= offsetX;
+        }
+
         // 4 points that make a bar
-        return [
-            [posX + barSpaceOffset, offset],
-            [posX + barSpaceOffset, posY - (y0 - offset)],
-            [posX + barW - barSpaceOffset, posY - (y0 - offset)],
-            [posX + barW - barSpaceOffset, offset]
+        var points = [
+            [posX + barSpaceOffset + startOffset, offset],
+            [posX + barSpaceOffset + startOffset, posY - (y0 - offset)],
+            [posX + barW - barSpaceOffset - finalOffset, posY - (y0 - offset)],
+            [posX + barW - barSpaceOffset - finalOffset, offset]
         ];
+
+        return points;
     };
 };
 ChartInternal.prototype.isWithinBar = function (mouse, that) {
