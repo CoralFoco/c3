@@ -51,9 +51,11 @@ ChartInternal.prototype.redrawBar = function (drawBar, withTransition, transitio
             .style("opacity", 1)
     ];
 };
-ChartInternal.prototype.getBarW = function (axis, barTargetsNum) {
-    var $$ = this, config = $$.config,
-        w = typeof config.bar_width === 'number' ? config.bar_width : barTargetsNum ? (axis.tickInterval() * config.bar_width_ratio) / barTargetsNum : 0;
+ChartInternal.prototype.getBarW = function (axis, barTargetsNum, d) {
+    var $$ = this, config = $$.config;
+    var ratioWidth = typeof config.bar_width_ratio === 'number' ? config.bar_width_ratio : config.bar_width_ratio(d);
+    var ratio = barTargetsNum ? (axis.tickInterval() * ratioWidth) / barTargetsNum : 0;
+    var w = typeof config.bar_width === 'number' ? config.bar_width : ratio;
     return config.bar_width_max && w > config.bar_width_max ? config.bar_width_max : w;
 };
 ChartInternal.prototype.getBars = function (i, id) {
@@ -94,14 +96,14 @@ ChartInternal.prototype.generateGetBarPoints = function (barIndices, isSub) {
         overlap = this.config.data_overlap,
         axis = isSub ? $$.subXAxis : $$.xAxis,
         barTargetsNum = barIndices.__max__ + 1,
-        barW = $$.getBarW(axis, barTargetsNum),
-        barX = $$.getShapeX(barW, barTargetsNum, barIndices, !!isSub),
         barY = $$.getShapeY(!!isSub),
         barOffset = $$.getShapeOffset($$.isBarType, barIndices, !!isSub),
-        barSpaceOffset = barW * ($$.config.bar_space / 2),
         yScale = isSub ? $$.getSubYScale : $$.getYScale;
     return function (d, i) {
         var y0 = yScale.call($$, d.id)(0),
+            barW = $$.getBarW(axis, barTargetsNum, d),
+            barX = $$.getShapeX(barW, barTargetsNum, barIndices, !!isSub),
+            barSpaceOffset = barW * ($$.config.bar_space / 2),
             offset = barOffset(d, i) || y0, // offset is for stacked bar chart
             posX = barX(d), posY = barY(d);
         // fix posY not to overflow opposite quadrant

@@ -4902,6 +4902,19 @@
     return config.regions;
   };
 
+  Chart.prototype.overlap = function (overlap) {
+    var $$ = this.internal,
+        config = $$.config;
+
+    if (isUndefined(overlap)) {
+      return config.data_overlap;
+    }
+
+    config.data_overlap = overlap;
+    $$.redraw();
+    return config.data_overlap;
+  };
+
   Chart.prototype.selected = function (targetId) {
     var $$ = this.internal,
         d3 = $$.d3;
@@ -6112,6 +6125,7 @@
       data_names: {},
       data_classes: {},
       data_groups: [],
+      data_overlap: [],
       data_axes: {},
       data_type: undefined,
       data_types: {},
@@ -8925,10 +8939,12 @@
     return [(withTransition ? this.mainBar.transition(transition) : this.mainBar).attr('d', drawBar).style("stroke", this.color).style("fill", this.color).style("opacity", 1)];
   };
 
-  ChartInternal.prototype.getBarW = function (axis, barTargetsNum) {
+  ChartInternal.prototype.getBarW = function (axis, barTargetsNum, d) {
     var $$ = this,
-        config = $$.config,
-        w = typeof config.bar_width === 'number' ? config.bar_width : barTargetsNum ? axis.tickInterval() * config.bar_width_ratio / barTargetsNum : 0;
+        config = $$.config;
+    var ratioWidth = typeof config.bar_width_ratio === 'number' ? config.bar_width_ratio : config.bar_width_ratio(d);
+    var ratio = barTargetsNum ? axis.tickInterval() * ratioWidth / barTargetsNum : 0;
+    var w = typeof config.bar_width === 'number' ? config.bar_width : ratio;
     return config.bar_width_max && w > config.bar_width_max ? config.bar_width_max : w;
   };
 
@@ -8969,16 +8985,17 @@
 
   ChartInternal.prototype.generateGetBarPoints = function (barIndices, isSub) {
     var $$ = this,
+        overlap = this.config.data_overlap,
         axis = isSub ? $$.subXAxis : $$.xAxis,
         barTargetsNum = barIndices.__max__ + 1,
-        barW = $$.getBarW(axis, barTargetsNum),
-        barX = $$.getShapeX(barW, barTargetsNum, barIndices, !!isSub),
         barY = $$.getShapeY(!!isSub),
         barOffset = $$.getShapeOffset($$.isBarType, barIndices, !!isSub),
-        barSpaceOffset = barW * ($$.config.bar_space / 2),
         yScale = isSub ? $$.getSubYScale : $$.getYScale;
     return function (d, i) {
       var y0 = yScale.call($$, d.id)(0),
+          barW = $$.getBarW(axis, barTargetsNum, d),
+          barX = $$.getShapeX(barW, barTargetsNum, barIndices, !!isSub),
+          barSpaceOffset = barW * ($$.config.bar_space / 2),
           offset = barOffset(d, i) || y0,
           // offset is for stacked bar chart
       posX = barX(d),
@@ -8988,6 +9005,10 @@
         if (0 < d.value && posY < y0 || d.value < 0 && y0 < posY) {
           posY = y0;
         }
+      }
+
+      if (overlap && overlap.length > 0 && overlap && overlap.indexOf(barIndices[d.id]) >= 0) {
+        offset = y0;
       } // 4 points that make a bar
 
 
