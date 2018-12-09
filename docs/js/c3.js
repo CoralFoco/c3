@@ -7303,6 +7303,7 @@
         idsInGroup,
         id,
         hasPositiveValue;
+    var overlap = config.data_overlap;
 
     if (config.data_groups.length > 0) {
       hasPositiveValue = $$.hasPositiveValueInTargets(targets);
@@ -7314,6 +7315,10 @@
         });
 
         if (idsInGroup.length === 0) {
+          continue;
+        }
+
+        if (overlap.indexOf(j) >= 0) {
           continue;
         }
 
