@@ -4902,6 +4902,19 @@
     return config.regions;
   };
 
+  Chart.prototype.overlap = function (overlap) {
+    var $$ = this.internal,
+        config = $$.config;
+
+    if (isUndefined(overlap)) {
+      return config.data_overlap;
+    }
+
+    config.data_overlap = overlap;
+    $$.redraw();
+    return config.data_overlap;
+  };
+
   Chart.prototype.selected = function (targetId) {
     var $$ = this.internal,
         d3 = $$.d3;
@@ -6112,6 +6125,7 @@
       data_names: {},
       data_classes: {},
       data_groups: [],
+      data_overlap: [],
       data_axes: {},
       data_type: undefined,
       data_types: {},
@@ -8606,12 +8620,36 @@
     var $$ = this,
         config = $$.config,
         xPos,
-        yScale = d.axis === 'y' ? $$.y : $$.y2;
+        yScale = d.axis === 'y' ? $$.y : $$.y2,
+        xYesterdayPos;
 
     if (d.axis === 'y' || d.axis === 'y2') {
       xPos = config.axis_rotated ? 'start' in d ? yScale(d.start) : 0 : 0;
     } else {
-      xPos = config.axis_rotated ? 0 : 'start' in d ? $$.x($$.isTimeSeries() ? $$.parseDate(d.start) : d.start) : 0;
+      var date = $$.parseDate(d.start);
+
+      if (config.axis_rotated) {
+        xPos = 0;
+      } else {
+        xPos = 'start' in d ? $$.x($$.isTimeSeries() ? date : d.start) : 0;
+
+        if (d.type) {
+          // Subtract one day
+          var yesterday = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
+
+          if (d.type === 'day') {
+            yesterday.setDate(yesterday.getDate() - 1);
+          } else if (d.type === 'hour') {
+            yesterday.setHours(yesterday.getHours() - 1);
+          }
+
+          xYesterdayPos = 'start' in d ? $$.x($$.isTimeSeries() ? yesterday : d.start) : 0;
+
+          if (xYesterdayPos !== 0) {
+            xPos = xYesterdayPos + (xPos - xYesterdayPos) / 2;
+          }
+        }
+      }
     }
 
     return xPos;
@@ -8637,12 +8675,31 @@
         config = $$.config,
         start = $$.regionX(d),
         end,
-        yScale = d.axis === 'y' ? $$.y : $$.y2;
+        yScale = d.axis === 'y' ? $$.y : $$.y2,
+        xTomorrowPos;
 
     if (d.axis === 'y' || d.axis === 'y2') {
       end = config.axis_rotated ? 'end' in d ? yScale(d.end) : $$.width : $$.width;
     } else {
-      end = config.axis_rotated ? $$.width : 'end' in d ? $$.x($$.isTimeSeries() ? $$.parseDate(d.end) : d.end) : $$.width;
+      var date = $$.parseDate(d.end);
+      end = config.axis_rotated ? $$.width : 'end' in d ? $$.x($$.isTimeSeries() ? date : d.end) : $$.width;
+
+      if (d.type) {
+        // Add one day
+        var tomorrow = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes());
+
+        if (d.type === 'day') {
+          tomorrow.setDate(tomorrow.getDate() - 1);
+        } else if (d.type === 'hour') {
+          tomorrow.setHours(tomorrow.getHours() - 1);
+        }
+
+        xTomorrowPos = 'end' in d ? $$.x($$.isTimeSeries() ? tomorrow : d.end) : 0;
+
+        if (xTomorrowPos !== 0) {
+          end = end + (end - xTomorrowPos) / 2;
+        }
+      }
     }
 
     return end < start ? 0 : end - start;
@@ -8969,6 +9026,7 @@
 
   ChartInternal.prototype.generateGetBarPoints = function (barIndices, isSub) {
     var $$ = this,
+        overlap = this.config.data_overlap,
         axis = isSub ? $$.subXAxis : $$.xAxis,
         barTargetsNum = barIndices.__max__ + 1,
         barW = $$.getBarW(axis, barTargetsNum),
@@ -8988,6 +9046,10 @@
         if (0 < d.value && posY < y0 || d.value < 0 && y0 < posY) {
           posY = y0;
         }
+      }
+
+      if (overlap && overlap.length > 0 && overlap && overlap.indexOf(barIndices[d.id]) >= 0) {
+        offset = y0;
       } // 4 points that make a bar
 
 
