@@ -4915,6 +4915,19 @@
     return config.data_overlap;
   };
 
+  Chart.prototype.stepHorizontal = function (stepHorizontal) {
+    var $$ = this.internal,
+        config = $$.config;
+
+    if (isUndefined(stepHorizontal)) {
+      return config.data_stepHorizontal;
+    }
+
+    config.data_stepHorizontal = stepHorizontal;
+    $$.redraw();
+    return config.data_stepHorizontal;
+  };
+
   Chart.prototype.selected = function (targetId) {
     var $$ = this.internal,
         d3 = $$.d3;
@@ -6126,6 +6139,7 @@
       data_classes: {},
       data_groups: [],
       data_overlap: [],
+      data_stepHorizontal: [],
       data_axes: {},
       data_type: undefined,
       data_types: {},
@@ -9228,6 +9242,7 @@
       return config.data_groups.length > 0 ? getPoints(d, i)[0][1] : yScaleGetter.call($$, d.id)(d.value);
     };
 
+    var stepHorizontal = config.data_stepHorizontal;
     line = config.axis_rotated ? line.x(yValue).y(xValue) : line.x(xValue).y(yValue);
 
     if (!config.line_connectNull) {
@@ -9237,6 +9252,7 @@
     }
 
     return function (d) {
+      var horizontal = stepHorizontal.indexOf(lineIndices[d.id]) >= 0;
       var values = config.line_connectNull ? $$.filterRemoveNull(d.values) : d.values,
           x = isSub ? $$.subX : $$.x,
           y = yScaleGetter.call($$, d.id),
@@ -9261,6 +9277,17 @@
         }
 
         path = config.axis_rotated ? "M " + y0 + " " + x0 : "M " + x0 + " " + y0;
+      }
+
+      if (horizontal) {
+        var p = path.replace(/L/g, ' L').split(' ').map(function (p, i) {
+          if (i % 2 === 0 && p[0] === 'L') {
+            return 'M' + p.substr(1);
+          } else {
+            return p;
+          }
+        });
+        path = p.join('');
       }
 
       return path ? path : "M 0 0";

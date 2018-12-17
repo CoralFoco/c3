@@ -14,6 +14,7 @@ import './api.legend';
 import './api.load';
 import './api.region';
 import './api.overlap';
+import './api.step-horizontal';
 import './api.selection';
 import './api.show';
 import './api.tooltip';
