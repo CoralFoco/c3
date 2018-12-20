@@ -340,6 +340,7 @@ ChartInternal.prototype.findClosestFromTargets = function (targets, pos) {
 ChartInternal.prototype.findClosest = function (values, pos) {
     var $$ = this,
         minDist = $$.config.point_sensitivity,
+        showBetweenValues = $$.config.tooltip_showBetweenValues,
         closest;
 
     // find mouseovering bar
@@ -352,16 +353,55 @@ ChartInternal.prototype.findClosest = function (values, pos) {
         }
     });
 
-    // find closest point from non-bar
-    values.filter(function (v) {
-        return v && !$$.isBarType(v.id);
-    }).forEach(function (v) {
-        var d = $$.dist(v, pos);
-        if (d < minDist) {
-            minDist = d;
-            closest = v;
+    if (showBetweenValues) {
+        for (let i = 0; i < values.length; i++) {
+            const value = values[i];
+            if (value && !$$.isBarType(value.id)) {
+                const xValue = $$.x(value.x);
+
+                if (!values[i + 1]) {
+                    if (pos[0] >= xValue - minDist && pos[0] <= xValue) {
+                        closest = value;
+                    }                    
+                } else {
+                    const next = values[i + 1];
+                    const xNext = $$.x(next.x);
+
+                    const array = values.reduce((prev, curr) => {
+                        if (prev.length === 0) {
+                            prev.push(curr.id);
+                        }
+
+                        if (curr.id !== prev[0]) {
+                            prev.push(curr.id);
+                        }
+
+                        return prev;
+                    }, []);
+
+                    if (array.length > 1 && xValue === xNext) {
+                        closest = value;
+                        break;
+                    }
+
+                    if (pos[0] >= xValue && pos[0] < xNext) {
+                        closest = value;
+                    }
+                }
+            }
         }
-    });
+    } else {
+        // find closest point from non-bar
+        values.filter(function (v) {
+            return v && !$$.isBarType(v.id);
+        }).forEach(function (v) {
+            var d = $$.dist(v, pos);
+            if (d < minDist) {
+                minDist = d;
+                closest = v;
+            }
+        });
+    }
 
     return closest;
 };

@@ -25,17 +25,25 @@
             type: 'timeseries',
           }
         },
-        grid: {
-          x: {
-            lines: [
-              { value: '2018-01-01', axis: 'x', type: 'day' },
-              { value: '2018-01-02', axis: 'x' },
-              { value: '2018-01-03', axis: 'x', type: 'day' },
-              { value: '2018-01-04', axis: 'x', type: 'day' },
-              { value: '2018-01-05', axis: 'x', type: 'day' },
-            ]
-          }
-        }
+        line: {
+          step: {
+            type: 'step-after',
+          },
+        },
+        tooltip: {
+          showBetweenValues: true,
+        },
+        // grid: {
+        //   x: {
+        //     lines: [
+        //       { value: '2018-01-01', axis: 'x', type: 'day' },
+        //       { value: '2018-01-02', axis: 'x' },
+        //       { value: '2018-01-03', axis: 'x', type: 'day' },
+        //       { value: '2018-01-04', axis: 'x', type: 'day' },
+        //       { value: '2018-01-05', axis: 'x', type: 'day' },
+        //     ]
+        //   }
+        // }
       });
 
     </script>

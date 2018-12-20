@@ -6283,7 +6283,7 @@
       // point - point of each data
       point_show: true,
       point_r: 2.5,
-      point_sensitivity: 10,
+      point_sensitivity: 50,
       point_focus_expand_enabled: true,
       point_focus_expand_r: undefined,
       point_select_r: undefined,
@@ -6352,6 +6352,7 @@
       },
       tooltip_onshow: function tooltip_onshow() {},
       tooltip_onhide: function tooltip_onhide() {},
+      tooltip_showBetweenValues: false,
       // title
       title_text: undefined,
       title_padding: {
@@ -7094,6 +7095,7 @@
   ChartInternal.prototype.findClosest = function (values, pos) {
     var $$ = this,
         minDist = $$.config.point_sensitivity,
+        showBetweenValues = $$.config.tooltip_showBetweenValues,
         closest; // find mouseovering bar
 
     values.filter(function (v) {
@@ -7104,18 +7106,59 @@
       if (!closest && $$.isWithinBar($$.d3.mouse(shape), shape)) {
         closest = v;
       }
-    }); // find closest point from non-bar
-
-    values.filter(function (v) {
-      return v && !$$.isBarType(v.id);
-    }).forEach(function (v) {
-      var d = $$.dist(v, pos);
-
-      if (d < minDist) {
-        minDist = d;
-        closest = v;
-      }
     });
+
+    if (showBetweenValues) {
+      for (var i = 0; i < values.length; i++) {
+        var value = values[i];
+
+        if (value && !$$.isBarType(value.id)) {
+          var xValue = $$.x(value.x);
+
+          if (!values[i + 1]) {
+            if (pos[0] >= xValue - minDist && pos[0] <= xValue) {
+              closest = value;
+            }
+          } else {
+            var next = values[i + 1];
+            var xNext = $$.x(next.x);
+            var array = values.reduce(function (prev, curr) {
+              if (prev.length === 0) {
+                prev.push(curr.id);
+              }
+
+              if (curr.id !== prev[0]) {
+                prev.push(curr.id);
+              }
+
+              return prev;
+            }, []);
+
+            if (array.length > 1 && xValue === xNext) {
+              closest = value;
+              break;
+            }
+
+            if (pos[0] >= xValue && pos[0] < xNext) {
+              closest = value;
+            }
+          }
+        }
+      }
+    } else {
+      // find closest point from non-bar
+      values.filter(function (v) {
+        return v && !$$.isBarType(v.id);
+      }).forEach(function (v) {
+        var d = $$.dist(v, pos);
+
+        if (d < minDist) {
+          minDist = d;
+          closest = v;
+        }
+      });
+    }
+
     return closest;
   };
 

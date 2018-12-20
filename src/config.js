@@ -164,7 +164,7 @@ ChartInternal.prototype.getDefaultConfig = function () {
         // point - point of each data
         point_show: true,
         point_r: 2.5,
-        point_sensitivity: 10,
+        point_sensitivity: 50,
         point_focus_expand_enabled: true,
         point_focus_expand_r: undefined,
         point_select_r: undefined,
@@ -230,6 +230,7 @@ ChartInternal.prototype.getDefaultConfig = function () {
         tooltip_init_position: {top: '0px', left: '50px'},
         tooltip_onshow: function () {},
         tooltip_onhide: function () {},
+        tooltip_showBetweenValues: false,
         // title
         title_text: undefined,
         title_padding: {
