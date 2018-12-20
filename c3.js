@@ -1948,6 +1948,26 @@
 
     if ($$.isTimeSeries()) {
       value = $$.parseDate(d.value);
+      var x = $$.x(value);
+
+      if (d.type) {
+        // Subtract one day
+        var yesterday = new Date(value.getFullYear(), value.getMonth(), value.getDate(), value.getHours(), value.getMinutes());
+
+        if (d.type === 'day') {
+          yesterday.setDate(yesterday.getDate() - 1);
+        } else if (d.type === 'hour') {
+          yesterday.setHours(yesterday.getHours() - 1);
+        }
+
+        var xYesterday = $$.x(yesterday);
+
+        if (xYesterday !== 0) {
+          x = xYesterday + (x - xYesterday) / 2;
+        }
+      }
+
+      return Math.ceil(x);
     } else if ($$.isCategorized() && typeof d.value === 'string') {
       value = $$.config.axis_x_categories.indexOf(d.value);
     }
