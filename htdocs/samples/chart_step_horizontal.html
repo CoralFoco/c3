@@ -23,6 +23,20 @@
         axis: {
           x: {
             type: 'timeseries',
+            contents: function (totalWidth, columns) {
+              console.log(totalWidth, columns);
+
+              let text = '';
+
+              for (let index = 1; index < columns[0].length; index++) {
+                const element = columns[0][index];
+                const width = totalWidth / (columns[0].length - 1);
+                text += `<rect style="width: ${width}px; height: 20px; transform: translateX(${width * (index - 1)}px); fill: #CCC"></rect>`;
+                text += `<text style="transform: translateX(${width * (index - 1)}px);">${element}</text>`;
+              }
+
+              return text;
+            }
           }
         },
         line: {
@@ -33,17 +47,6 @@
         tooltip: {
           showBetweenValues: true,
         },
-        // grid: {
-        //   x: {
-        //     lines: [
-        //       { value: '2018-01-01', axis: 'x', type: 'day' },
-        //       { value: '2018-01-02', axis: 'x' },
-        //       { value: '2018-01-03', axis: 'x', type: 'day' },
-        //       { value: '2018-01-04', axis: 'x', type: 'day' },
-        //       { value: '2018-01-05', axis: 'x', type: 'day' },
-        //     ]
-        //   }
-        // }
       });
 
     </script>

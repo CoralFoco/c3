@@ -97,6 +97,7 @@ ChartInternal.prototype.getDefaultConfig = function () {
         legend_item_tile_height: 10,
         // axis
         axis_rotated: false,
+        axis_x_contents: undefined,
         axis_x_show: true,
         axis_x_type: 'indexed',
         axis_x_localtime: true,

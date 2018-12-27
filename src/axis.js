@@ -25,6 +25,11 @@ Axis.prototype.init = function init() {
         .attr("clip-path", config.axis_x_inner ? "" : $$.clipPathForXAxis)
         .attr("transform", $$.getTranslate('x'))
         .style("visibility", config.axis_x_show ? 'visible' : 'hidden');
+    
+    if (config.axis_x_contents) {
+        $$.axes.x.append('g').attr('class', 'c3-axis-x-area').html(config.axis_x_contents.call($$, $$.width, config.data_columns));
+    }
+        
     $$.axes.x.append("text")
         .attr("class", CLASS.axisXLabel)
         .attr("transform", config.axis_rotated ? "rotate(-90)" : "")
@@ -414,9 +419,15 @@ Axis.prototype.generateTransitions = function generateTransitions(duration) {
 };
 Axis.prototype.redraw = function redraw(duration, isHidden) {
     var $$ = this.owner,
+        config = $$.config,
         transition = duration ? $$.d3.transition().duration(duration) : null;
     $$.axes.x.style("opacity", isHidden ? 0 : 1).call($$.xAxis, transition);
     $$.axes.y.style("opacity", isHidden ? 0 : 1).call($$.yAxis, transition);
     $$.axes.y2.style("opacity", isHidden ? 0 : 1).call($$.y2Axis, transition);
     $$.axes.subx.style("opacity", isHidden ? 0 : 1).call($$.subXAxis, transition);
+
+    if (config.axis_x_contents) {
+        $$.axes.x.select('.c3-axis-x-area').remove();
+        $$.axes.x.insert('g', ':first-child').attr('class', 'c3-axis-x-area').html(config.axis_x_contents.call($$, $$.width, config.data_columns));
+    }
 };

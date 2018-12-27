@@ -11,16 +11,37 @@
 
       var generate = function () { return c3.generate({
         data: {
+          x: 'x',
+          xFormat: '%Y-%m-%d',
           columns: [
-            ['data1', 30, 200, 100],
-            ['data2', 50, 20, 10],
-            ['data3', 150, 120, 110]
+            ['x', '2018-01-01', '2018-01-02', '2018-01-03', '2018-01-04', '2018-01-05', '2018-01-06'],
+            ['data1', 300, 350, 300, 0, 0, 0],
+            ['data2', 130, 100, 140, 200, 150, 50]
           ],
           type: 'bar'
         },
         bar: {
           space: 0.25
-        }
+        },
+        axis: {
+          x: {
+            type: 'timeseries',
+            contents: function (totalWidth, columns) {
+              console.log(totalWidth, columns);
+
+              let text = '';
+
+              for (let index = 1; index < columns[0].length; index++) {
+                const element = columns[0][index];
+                const width = totalWidth / (columns[0].length - 1);
+                text += `<rect style="width: ${width}px; height: 20px; transform: translateX(${width * (index - 1)}px); fill: #CCC"></rect>`;
+                text += `<text style="transform: translateX(${width * (index - 1)}px);">${element}</text>`;
+              }
+
+              return text;
+            }
+          }
+        },
       }); }, chart = generate();
 
     </script>
