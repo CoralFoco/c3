@@ -232,6 +232,7 @@ ChartInternal.prototype.getDefaultConfig = function () {
         tooltip_onshow: function () {},
         tooltip_onhide: function () {},
         tooltip_showBetweenValues: false,
+        tooltip_showLastValue: true,
         // title
         title_text: undefined,
         title_padding: {

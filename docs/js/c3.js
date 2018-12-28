@@ -6365,6 +6365,7 @@
       tooltip_onshow: function tooltip_onshow() {},
       tooltip_onhide: function tooltip_onhide() {},
       tooltip_showBetweenValues: false,
+      tooltip_showLastValue: true,
       // title
       title_text: undefined,
       title_padding: {
@@ -7108,6 +7109,7 @@
     var $$ = this,
         minDist = $$.config.point_sensitivity,
         showBetweenValues = $$.config.tooltip_showBetweenValues,
+        showLastValue = $$.config.tooltip_showLastValue,
         closest; // find mouseovering bar
 
     values.filter(function (v) {
@@ -7128,8 +7130,10 @@
           var xValue = $$.x(value.x);
 
           if (!values[i + 1]) {
-            if (pos[0] >= xValue - minDist && pos[0] <= xValue) {
-              closest = value;
+            if (showLastValue) {
+              if (pos[0] >= xValue - minDist && pos[0] <= xValue) {
+                closest = value;
+              }
             }
           } else {
             var next = values[i + 1];

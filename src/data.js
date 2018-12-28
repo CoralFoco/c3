@@ -341,6 +341,7 @@ ChartInternal.prototype.findClosest = function (values, pos) {
     var $$ = this,
         minDist = $$.config.point_sensitivity,
         showBetweenValues = $$.config.tooltip_showBetweenValues,
+        showLastValue = $$.config.tooltip_showLastValue,
         closest;
 
     // find mouseovering bar
@@ -360,9 +361,11 @@ ChartInternal.prototype.findClosest = function (values, pos) {
                 const xValue = $$.x(value.x);
 
                 if (!values[i + 1]) {
-                    if (pos[0] >= xValue - minDist && pos[0] <= xValue) {
-                        closest = value;
-                    }                    
+                    if (showLastValue) {
+                        if (pos[0] >= xValue - minDist && pos[0] <= xValue) {
+                            closest = value;
+                        }
+                    } 
                 } else {
                     const next = values[i + 1];
                     const xNext = $$.x(next.x);
