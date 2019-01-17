@@ -327,12 +327,17 @@ ChartInternal.prototype.isArc = function (d) {
 
 ChartInternal.prototype.findClosestFromTargets = function (targets, pos) {
     var $$ = this,
+        showBetweenValues = $$.config.tooltip_showBetweenValues,
         candidates;
 
     // map to array of closest points of each target
     candidates = targets.map(function (target) {
         return $$.findClosest(target.values, pos);
     });
+
+    if (showBetweenValues && candidates.length === 1) {
+        return candidates[0];
+    }
 
     // decide closest point and return
     return $$.findClosest(candidates, pos);
