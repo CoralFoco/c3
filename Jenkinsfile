@@ -3,11 +3,6 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        git(url: 'git@github.com:paulomenezes/c3.git', branch: 'master')
-      }
-    }
-    stage('error') {
-      steps {
         sh 'npm install'
       }
     }
