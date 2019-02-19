@@ -1,17 +1,12 @@
 pipeline {
-  agent {
-    node {
-      label 'c3'
-    }
-
-  }
+  agent any
   stages {
     stage('Build') {
       steps {
         git(url: 'git@github.com:paulomenezes/c3.git', branch: 'master')
       }
     }
-    stage('') {
+    stage('error') {
       steps {
         sh 'npm install'
       }
