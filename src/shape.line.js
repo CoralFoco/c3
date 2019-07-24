@@ -80,7 +80,10 @@ ChartInternal.prototype.generateDrawLine = function (lineIndices, isSub) {
     line = config.axis_rotated ? line.x(yValue).y(xValue) : line.x(xValue).y(yValue);
     if (!config.line_connectNull) { line = line.defined(function (d) { return d.value != null; }); }
     return function (d) {
-        const horizontal = stepHorizontal.indexOf(lineIndices[d.id]) >= 0;
+        let horizontal = false;
+        if (stepHorizontal && stepHorizontal.length > 0) {
+            horizontal = stepHorizontal.map(s => s - 1).indexOf(lineIndices[d.id]) >= 0;
+        }
 
         var values = config.line_connectNull ? $$.filterRemoveNull(d.values) : d.values,
             x = isSub ? $$.subX : $$.x, y = yScaleGetter.call($$, d.id), x0 = 0, y0 = 0, path;
@@ -99,7 +102,7 @@ ChartInternal.prototype.generateDrawLine = function (lineIndices, isSub) {
             path = config.axis_rotated ? "M " + y0 + " " + x0 : "M " + x0 + " " + y0;
         }
 
-        if (horizontal) {
+        if (horizontal && path) {
             const p = path.replace(/L/g, ' L').split(' ').map((p, i) => {
                 if (i % 2 === 0 && p[0] === 'L') {
                     return 'M' + p.substr(1);

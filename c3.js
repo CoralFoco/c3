@@ -9385,7 +9385,14 @@
     }
 
     return function (d) {
-      var horizontal = stepHorizontal.indexOf(lineIndices[d.id]) >= 0;
+      var horizontal = false;
+
+      if (stepHorizontal && stepHorizontal.length > 0) {
+        horizontal = stepHorizontal.map(function (s) {
+          return s - 1;
+        }).indexOf(lineIndices[d.id]) >= 0;
+      }
+
       var values = config.line_connectNull ? $$.filterRemoveNull(d.values) : d.values,
           x = isSub ? $$.subX : $$.x,
           y = yScaleGetter.call($$, d.id),
@@ -9412,7 +9419,7 @@
         path = config.axis_rotated ? "M " + y0 + " " + x0 : "M " + x0 + " " + y0;
       }
 
-      if (horizontal) {
+      if (horizontal && path) {
         var p = path.replace(/L/g, ' L').split(' ').map(function (p, i) {
           if (i % 2 === 0 && p[0] === 'L') {
             return 'M' + p.substr(1);
